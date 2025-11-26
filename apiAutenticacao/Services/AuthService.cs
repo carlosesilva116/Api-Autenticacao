@@ -1,6 +1,7 @@
 ﻿using apiAutenticacao.Data;
 using apiAutenticacao.Models;
 using apiAutenticacao.Models.DTO;
+using apiAutenticacao.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static BCrypt.Net.BCrypt;
@@ -19,7 +20,7 @@ namespace apiAutenticacao.Services
 
         }
 
-        public async Task<string> Login(LoginDTO dadosUsuario)
+        public async Task<ResponseLogin> Login(LoginDTO dadosUsuario)
         {
 
             Usuario? usuarioEncontrado = await _context.Usuarios.FirstOrDefaultAsync(usuario => usuario.Email == dadosUsuario.Email);
@@ -30,13 +31,28 @@ namespace apiAutenticacao.Services
 
                 if (isValiPassword)
                 {
-                    return "Login realizado com sucesso";
+                    return new ResponseLogin
+                    {
+                        Erro = false,
+                        Message = "Login realizado com sucesso",
+                        Usuario = usuarioEncontrado
+                    };
                 }
 
-                return "Login náo realizado. Email ou senha incorreta";
+                return new ResponseLogin
+                {
+                    Erro = true,
+                    Message = "login não realizado. Email ou senha incorretos",
+         
+                };
             }
 
-            return "Usuário não encontrado";
+            return new ResponseLogin
+            {
+                Erro = true,
+                Message = "Usuário não encontrado",
+               
+            };
 
         }
 
