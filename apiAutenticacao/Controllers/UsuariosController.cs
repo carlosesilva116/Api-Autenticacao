@@ -33,41 +33,23 @@ namespace apiAutenticacao.Controllers
 
                     return BadRequest(ModelState);
             }
-            Usuario? usuarioExistente = await _context.Usuarios.FirstOrDefaultAsync(usuario => usuario.Email == dadosUsuario.Email);
 
-            if (usuarioExistente != null)
+            ResponseCadastro response = await _authService.CadastrarUsuarioAsync(dadosUsuario);
 
-                return BadRequest(new { erro = true, mensagem = "Este email já esta cadastrado" });
-
-            Usuario usuario = new Usuario
+            if (response.Erro)
             {
-                Nome = dadosUsuario.Nome,
-                Email = dadosUsuario.Email,
-                Senha = HashPassword(dadosUsuario.Senha),
-                ConfirmarSenha = HashPassword(dadosUsuario.Senha)
 
-            };
-            _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync();
+                return BadRequest(response);
 
-            return Ok(new
-            {
-                erro = false,
-                mensagem = "Usuário criado com sucesso",
-                usuario = new
-                {
+            }
 
-                    id = usuario.Id,
-                    nome = usuario.Nome,
-                    email = usuario.Email
-                }
+            return Ok(response);
 
-
-            });
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDTO dadosUsuario) {
+        public async Task<IActionResult> Login([FromBody] LoginDTO dadosUsuario)
+        {
 
             if (!ModelState.IsValid)
             {
@@ -76,14 +58,37 @@ namespace apiAutenticacao.Controllers
 
             ResponseLogin response = await _authService.Login(dadosUsuario);
 
-           if (response.Erro)
+            if (response.Erro)
             {
                 return BadRequest(response.Message);
 
             }
-           return Ok(response);
+            return Ok(response);
         }
 
+
+
+        [HttpPut ("AlterarSenha")]
+        public async Task<IActionResult> AlterarSenha([FromBody] AlterarSenhaDTO dadosAlterarSenha)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            ResponseAlterarSenha response = await _authService.AlterarSenhaAsync(dadosAlterarSenha);
+
+            if (response.Erro)
+            {
+                return BadRequest(response);
+
+            }
+            return Ok(response);
+
+
+
+        }
     }
 }
     
